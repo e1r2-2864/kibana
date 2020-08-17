@@ -18,7 +18,6 @@
  */
 
 import { intersection, isObject } from 'lodash';
-import { Auditor } from '../../audit_trail';
 import { Headers } from '../../http/router';
 import { LegacyAPICaller, LegacyCallAPIOptions } from './api_types';
 
@@ -45,8 +44,7 @@ export class LegacyScopedClusterClient implements ILegacyScopedClusterClient {
   constructor(
     private readonly internalAPICaller: LegacyAPICaller,
     private readonly scopedAPICaller: LegacyAPICaller,
-    private readonly headers?: Headers,
-    private readonly auditor?: Auditor
+    private readonly headers?: Headers
   ) {
     this.callAsCurrentUser = this.callAsCurrentUser.bind(this);
     this.callAsInternalUser = this.callAsInternalUser.bind(this);
@@ -66,13 +64,6 @@ export class LegacyScopedClusterClient implements ILegacyScopedClusterClient {
     clientParams: Record<string, any> = {},
     options?: LegacyCallAPIOptions
   ) {
-    // if (this.auditor) {
-    //   this.auditor.add({
-    //     message: endpoint,
-    //     type: 'elasticsearch.call.internalUser',
-    //   });
-    // }
-
     return this.internalAPICaller(endpoint, clientParams, options);
   }
 
@@ -104,13 +95,6 @@ export class LegacyScopedClusterClient implements ILegacyScopedClusterClient {
 
       clientParams.headers = Object.assign({}, clientParams.headers, this.headers);
     }
-
-    // if (this.auditor) {
-    //   this.auditor.add({
-    //     message: endpoint,
-    //     type: 'elasticsearch.call.currentUser',
-    //   });
-    // }
 
     return this.scopedAPICaller(endpoint, clientParams, options);
   }

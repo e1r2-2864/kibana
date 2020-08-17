@@ -15,19 +15,11 @@ interface Deps {
 }
 
 export class AuditTrailClient implements Auditor {
-  private scope?: string;
   constructor(
     private readonly request: KibanaRequest,
     private readonly event$: Subject<AuditEvent>,
     private readonly deps: Deps
   ) {}
-
-  public withAuditScope(name: string) {
-    if (this.scope !== undefined) {
-      throw new Error(`Audit scope is already set to: ${this.scope}`);
-    }
-    this.scope = name;
-  }
 
   public add<Args>(decorateEvent: AuditEventDecorator<Args>, args: Args) {
     const user = this.deps.getCurrentUser(this.request);
@@ -37,6 +29,10 @@ export class AuditTrailClient implements Auditor {
       {
         user: {
           name: user?.username!,
+          roles: user?.roles,
+        },
+        kibana: {
+          namespace: spaceId!,
         },
         trace: {
           id: 'abc', // TODO: Use `request.id` once https://github.com/elastic/kibana/pull/71019 is merged
